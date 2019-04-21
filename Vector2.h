@@ -3,7 +3,7 @@
 #include <ostream>
 #include <vector>
 #include <algorithm>
-#include <numeric>
+
 
 template<typename T>
 struct Vector2 
@@ -24,17 +24,17 @@ struct Vector2
 		return *this;
 	}
 
-	Vector2<T>& operator*=(Vector2<T> const& v)
+	Vector2<T>& operator*=(T const& a)
 	{
-		x *= v.x;
-		y *= v.y;
+		x *= a;
+		y *= a;
 		return *this;
 	}
 
-	Vector2<T>& operator/=(Vector2<T> const& v)
+	Vector2<T>& operator/=(T const& a)
 	{
-		x /= v.x;
-		y /= v.y;
+		x /= a;
+		y /= a;
 		return *this;
 	}
 
@@ -53,21 +53,28 @@ Vector2<T> operator-(Vector2<T> const& a, Vector2<T> const& b)
 }
 
 template<typename T>
-Vector2<T> operator*(Vector2<T> const& a, Vector2<T> const& b)
+Vector2<T> operator*(Vector2<T> const& v, T const& a)
 {
-	return Vector2<T>{ a.x * b.x, a.y * b.y };
+	return Vector2<T>{ v.x * a, v.y * a };
 }
 
 template<typename T>
-Vector2<T> operator/(Vector2<T> const& a, Vector2<T> const& b)
+Vector2<T> operator*(T const& a, Vector2<T> const& v)
 {
-	return Vector2<T>{ a.x / b.x, a.y / b.y };
+	return Vector2<T>{ a * v.x, a * v.y };
+}
+
+template<typename T>
+Vector2<T> operator/(Vector2<T> const& v, T const& a)
+{
+	return Vector2<T>{ v.x / a, v.y / a };
 }
 
 template<typename T>
 T sqlength(Vector2<T> const& a)
 {
-	return std::accumulate(a.x, a.y, static_cast<T>(0), [](T const& acc, T const& x) { return acc + x * x; });
+	T l = a.x * a.x + a.y * a.y;
+	return l;
 }
 
 template<typename T>
@@ -77,13 +84,7 @@ T length(Vector2<T>const& a)
 }
 
 template<typename T>
-T dot(Vector2<T>const& a, Vector2<T>const& b)
-{
-	return std::inner_product(a.x, a.y, b.x, b.y );
-}
-
-template<typename T>
-std::istream& operator>>(std::istream& s, Vector<T> const& d)
+std::istream& operator>>(std::istream& s, Vector2<T> const& d)
 {
 	std::string tmp;
 	std::getline(s, tmp);
@@ -98,16 +99,8 @@ std::istream& operator>>(std::istream& s, Vector<T> const& d)
 }
 
 template<typename T>
-std::ostream& operator<< (std::ostream& o, Vector<T> const& v)
+std::ostream& operator<< (std::ostream& o, Vector2<T> const& v)
 {
-	int n = v.size();
-	if (n > 0)
-	{
-		for (int i = 0; i < n - 1; ++i)
-		{
-			o << v[i] << "   ";
-		}
-		o << v[n - 1];
-	}
+	o << v.x << " " << v.y;
 	return o;
 }
