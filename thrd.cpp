@@ -27,7 +27,6 @@ int main()
 
 	auto time0 = std::chrono::high_resolution_clock::now();
 
-	//start threads:
 	for (int n = 0; n < max_num_of_threads; ++n)
 	{
 		auto it0 = vec.begin() + n * vec.size() / max_num_of_threads;
@@ -35,7 +34,6 @@ int main()
 		futures[n] = std::async(std::launch::async, averager, it0, it1);
 	}
 
-	//wait on the futures and add results when they become available:
 	auto parallel_result = std::accumulate(futures.begin(), futures.end(), 0.0, [](double acc, std::future<double>& f) { return acc + f.get(); });
 
 	auto time1 = std::chrono::high_resolution_clock::now();
