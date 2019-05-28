@@ -5,7 +5,6 @@
 #include <cmath>
 #include <ostream>
 
-using namespace std;
 
 namespace detail
 {
