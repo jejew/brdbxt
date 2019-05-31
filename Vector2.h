@@ -65,6 +65,12 @@ Vector2<T> operator*(T const& a, Vector2<T> const& v)
 }
 
 template<typename T>
+T operator*(Vector2<T> const& u, Vector2<T> const& v)
+{
+	return u.x * v.x + u.y * v.y;;
+}
+
+template<typename T>
 Vector2<T> operator/(Vector2<T> const& v, T const& a)
 {
 	return Vector2<T>{ v.x / a, v.y / a };
@@ -73,29 +79,13 @@ Vector2<T> operator/(Vector2<T> const& v, T const& a)
 template<typename T>
 T sqlength(Vector2<T> const& a)
 {
-	T l = a.x * a.x + a.y * a.y;
-	return l;
+	return a.x * a.x + a.y * a.y;;
 }
 
 template<typename T>
 T length(Vector2<T>const& a)
 {
 	return std::sqrt(sqlength(a));
-}
-
-template<typename T>
-std::istream& operator>>(std::istream& s, Vector2<T> const& d)
-{
-	std::string tmp;
-	std::getline(s, tmp);
-	if (tmp.size() > 0)
-	{
-		std::stringstream ss(tmp);
-		std::getline(ss, tmp, ','); d.i = std::stoi(tmp);
-		std::getline(ss, tmp, ','); d.x = std::stod(tmp);
-		std::getline(ss, d.s);
-	}
-	return s;
 }
 
 template<typename T>
