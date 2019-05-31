@@ -128,162 +128,219 @@ struct Matrix
 };
 
 template<typename T>
-Matrix<T>&& operator/(Matrix<T>&& A, T const& s)
+Matrix<T> operator/( Matrix<T> const& v1, T const& scl )
 {
-	return Matrix<T>(Idx1{},
-		[&](auto i) { return move(A[i]) / s; },
-		3);
+    Matrix<T> result;
+    result.data.resize(v1.data.size());
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    result.data.begin(),
+    [=](T const& x){ return x / scl; });
+    return result;
 }
 
 template<typename T>
-Matrix<T> operator/(Matrix<T> const& A, T const& s)
+Matrix<T> operator/( Matrix<T> && v1, T const& scl )
 {
-	return Matrix<T>(Idx1{},
-		[&](auto i) { return A[i] / s; },
-		3);
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v1.data.begin(),
+    [=](T const& x){ return x / scl; });
+    return std::move(v1);
 }
 
 template<typename T>
-Matrix<T>&& operator*(Matrix<T>&& A, T const& s)
+Matrix<T> operator*( Matrix<T> const& v1, T const& scl )
 {
-	return Matrix<T>(Idx1{},
-		[&](auto i) { return A[i] * s; },
-		3);
+    Matrix<T> result;
+    result.data.resize(v1.data.size());
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    result.data.begin(),
+    [=](T const& x){ return x * scl; });
+    return result;
 }
 
 template<typename T>
-Matrix<T> operator*(Matrix<T> const& A, T const& s)
+Matrix<T> operator*( Matrix<T> && v1, T const& scl )
 {
-	return Matrix<T>(Idx1{},
-		[&](auto i) { return A[i] * s; },
-		3);
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v1.data.begin(),
+    [=](T const& x){ return x * scl; });
+    return std::move(v1);
 }
 
 template<typename T>
-Matrix<T>&& operator*(T const& s, Matrix<T>&& A)
+Matrix<T> operator*( T const& scl , Matrix<T> const& v1 )
 {
-	return Matrix<T>(Idx1{},
-		[&](auto i) { return s * A[i]; },
-		3);
+    Matrix<T> result;
+    result.data.resize(v1.data.size());
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    result.data.begin(),
+    [=](T const& x){ return scl * x; });
+    return result;
 }
 
 template<typename T>
-Matrix<T> operator*(T const& s, Matrix<T> const& A)
+Matrix<T> operator*( T const& scl, Matrix<T> && v1 )
 {
-	return Matrix<T>(Idx1{},
-		[&](auto i) { return  s * A[i]; },
-		3);
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v1.data.begin(),
+    [=](T const& x){ return scl * x; });
+    return std::move(v1);
 }
 
 template<typename T>
 Matrix<T> operator*(Matrix<T> const& A, Matrix<T> const& B)
 {
+	int n = A.size();
 	return Matrix<T>(Idx2{}, [&](int i, int j)
 		{
 			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) * B(k, j); }
+			for (int k = 0; k < n; ++k) { sum += A(i, k) * B(k, j); }
 			return sum;
-		}, 3);
+		}, n);
 }
 
 template<typename T>
 Matrix<T> operator*(Matrix<T> && A, Matrix<T> && B)
 {
+	int n = A.size();
 	return Matrix<T>(Idx2{}, [&](int i, int j)
 		{
 			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) * B(k, j); }
-			return move(sum);
-		}, 3);
-}
-
-template<typename T>
-Matrix<T> operator+(Matrix<T> const& A, Matrix<T> const& B)
-{
-	return Matrix<T>(Idx2{}, [&](int i, int j)
-		{
-			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) + B(k, j); }
+			for (int k = 0; k < n; ++k) { sum += std::move(A(i, k)) * std::move(B(k, j)); }
 			return sum;
-		}, 3);
+		}, n);
 }
 
 template<typename T>
-Matrix<T> operator+(Matrix<T>&& A, Matrix<T>&& B)
+Matrix<T> operator*(Matrix<T> && A, Matrix<T> const& B)
 {
+	int n = A.size();
 	return Matrix<T>(Idx2{}, [&](int i, int j)
 		{
 			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) + B(k, j); }
-			return move(sum);
-		}, 3);
-}
-
-template<typename T>
-Matrix<T> operator+(Matrix<T> const& A, Matrix<T>&& B)
-{
-	return Matrix<T>(Idx2{}, [&](int i, int j)
-		{
-			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) + B(k, j); }
-			return move(sum);
-		}, 3);
-}
-
-template<typename T>
-Matrix<T> operator+(Matrix<T>&& A, Matrix<T> const& B)
-{
-	return Matrix<T>(Idx2{}, [&](int i, int j)
-		{
-			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) + B(k, j); }
-			return move(sum);
-		}, 3);
-}
-
-template<typename T>
-Matrix<T> operator-(Matrix<T> const& A, Matrix<T> const& B)
-{
-	return Matrix<T>(Idx2{}, [&](int i, int j)
-		{
-			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) - B(k, j); }
+			for (int k = 0; k < n; ++k) { sum += std::move(A(i, k)) * B(k, j); }
 			return sum;
-		}, 3);
+		}, n);
 }
 
 template<typename T>
-Matrix<T> operator-(Matrix<T>&& A, Matrix<T>&& B)
+Matrix<T> operator*(Matrix<T> const& A, Matrix<T> && B)
 {
+	int n = A.size();
 	return Matrix<T>(Idx2{}, [&](int i, int j)
 		{
 			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) - B(k, j); }
-			return move(sum);
-		}, 3);
+			for (int k = 0; k < n; ++k) { sum += (i, k) * std::move(B(k, j)); }
+			return sum;
+		}, n);
 }
 
 template<typename T>
-Matrix<T> operator-(Matrix<T>&& A, Matrix<T> const& B)
+Matrix<T> operator+( Matrix<T> const& v1, Matrix<T> const& v2 )
 {
-	return Matrix<T>(Idx2{}, [&](int i, int j)
-		{
-			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) - B(k, j); }
-			return move(sum);
-		}, 3);
+    Matrix<T> result;
+    result.data.resize(v1.data.size());
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    result.data.begin(),
+    [](T const& x, T const& y){ return x+y; });
+    return result;
+}
+ 
+ 
+template<typename T>
+Matrix<T>&& operator+( Matrix<T>&& v1, Matrix<T> const& v2 )
+{
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    v1.data.begin(),
+    [](T const& x, T const& y){ return x+y; }
+    );
+    return std::move(v1);
 }
 
 template<typename T>
-Matrix<T> operator-(Matrix<T> const& A, Matrix<T>&& B)
+Matrix<T>&& operator+( Matrix<T> const& v1, Matrix<T> && v2 )
 {
-	return Matrix<T>(Idx2{}, [&](int i, int j)
-		{
-			T sum = 0.0;
-			for (int k = 0; k < 3; ++k) { sum += A(i, k) - B(k, j); }
-			return move(sum);
-		}, 3);
+    std::transform(v2.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    v2.data.begin(),
+    [](T const& x, T const& y){ return x+y; }
+    );
+    return std::move(v2);
 }
+
+template<typename T>
+Matrix<T>&& operator+( Matrix<T>&& v1, Matrix<T> && v2 )
+{
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    v1.data.begin(),
+    [](T const& x, T const& y){ return x+y; }
+    );
+    return std::move(v1);
+}
+
+template<typename T>
+Matrix<T> operator-( Matrix<T> const& v1, Matrix<T> const& v2 )
+{
+    Matrix<T> result;
+    result.data.resize(v1.data.size());
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    result.data.begin(),
+    [](T const& x, T const& y){ return x-y; });
+    return result;
+}
+
+template<typename T>
+Matrix<T>&& operator-( Matrix<T>&& v1, Matrix<T> const& v2 )
+{
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    v1.data.begin(),
+    [](T const& x, T const& y){ return x-y; }
+    );
+    return std::move(v1);
+}
+
+template<typename T>
+Matrix<T>&& operator-( Matrix<T> const& v1, Matrix<T> && v2 )
+{
+    std::transform(v2.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    v2.data.begin(),
+    [](T const& x, T const& y){ return x-y; }
+    );
+    return std::move(v2);
+}
+
+
+template<typename T>
+Matrix<T>&& operator-( Matrix<T>&& v1, Matrix<T> && v2 )
+{
+    std::transform(v1.data.begin(),
+    v1.data.end(),
+    v2.data.begin(),
+    v1.data.begin(),
+    [](T const& x, T const& y){ return x-y; }
+    );
+    return std::move(v1);
+}
+
 
 template<typename T>
 std::ostream& operator<< (std::ostream& o, Matrix<T> const& v)
@@ -300,5 +357,3 @@ std::ostream& operator<< (std::ostream& o, Matrix<T> const& v)
 	}
 	return o;
 }
-
-
