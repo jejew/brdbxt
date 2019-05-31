@@ -45,124 +45,271 @@ int main()
 	}
 
 
-	Matrix<double> u{ Idx1{}, [](int i) { return i * 2; }, 3 };
-	Matrix<double> v{ Idx1{}, [](int i) { return i + 1; }, 3 };
+	Matrix<double> p{ Idx1{}, [](int i) { return i * 2; }, 2 };
+	Matrix<double> q{ Idx1{}, [](int i) { return i + 1; }, 2 };
 
 	
 	{
-		Matrix<double> res = u -= v;
-		if (u.size() != 9) { err("-= test [size]"); }
-		if (v.size() != 9) { err("-= test [src size]"); }
+		Matrix<double> res = p -= q;
+		if (p.size() != 4) { err("-= test [size]"); }
+		if (q.size() != 4) { err("-= test [src size]"); }
 		if (res[0] != -1 || res[1] != 0 || res [2] != 1 ) { err("-= test [src elements]"); }
 	}
 
 	{
-		Matrix<double> res = v += u;
-		if (u.size() != 9) { err("-= test [size]"); }
-		if (v.size() != 9) { err("-= test [src size]"); }
+		Matrix<double> res = p += q;
+		if (p.size() != 4) { err("-= test [size]"); }
+		if (q.size() != 4) { err("-= test [src size]"); }
 		if (res[0] != 0 || res[1] != 2 || res[2] != 4) { err("+= test [src elements]"); }
 	}
 	
 	{
-		Matrix<double> res = u*= 2.0;
-		if (res.size() != 9) { err("*= test [size]"); }
+		Vector<double> ref = {0, 4, 8, 12};
+		p *= 2.0;
+		if(a.size() != 4)          { err("*= test [size]");  }
+		if(std::abs(ref[0]-a[0]) > 1e-15 ||
+		   std::abs(ref[1]-a[1]) > 1e-15 || 
+		   std::abs(ref[2]-a[2]) > 1e-15 ||
+		   std::abs(ref[3]-a[3]) > 1e-15     ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Vector<double> ref = {0, 1, 2, 3};
+		p /= 2.0;
+		if(a.size() != 4)          { err("*= test [size]");  }
+		if(std::abs(ref[0]-a[0]) > 1e-15 ||
+		   std::abs(ref[1]-a[1]) > 1e-15 || 
+		   std::abs(ref[2]-a[2]) > 1e-15 ||
+		   std::abs(ref[3]-a[3]) > 1e-15     ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
 
-
+	
+	Matrix<double> u = { 2, 3, 4, 1 };
+	Matrix<double> v = { 1, 3, 1, 4 };
+ 
+    	{
+		Matrix<double> ref = {3, 6, 5, 5};
+		Matrix<double> res = u + v;
+		if(u.size() != 4)                              { err("operator+ test (l-value, l-value) [src size]");     }
+		if(u[0] != 2 || u[1] != 3 || u[2] != 4 || u[3] != 1)  { err("operator+ test (l-value, l-value) [src elements]"); }
+		if(v.size() != 4)                              { err("operator+ test (l-value, l-value) [src size]");     }
+		if(v[0] != 1 || v[1] != 3 || v[2] != 1 || v[3] != 4){ err("operator+ test (l-value, l-value) [src elements]"); }
+		if(res.size() != 4)                            { err("operator+ test (l-value, l-value) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
 	{
-		Matrix<double> res = u /= 2.0;
-		if (res.size() != 9) { err("*= test [size]"); }
+		Matrix<double> ref = {3, 6, 5, 5};
+		Matrix<double> res = std::move(v) + u;
+		if(u.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(v.size() != 0)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                            { err("operator- test (r-value, l-value) [size]");         }
+		if(u[0] != 2 || u[1] !=  3 || u[2] !=  4 || u[3] != 1){ err("operator- test (r-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {3, 6, 5, 5};
+		Matrix<double> res = v + std::move(u);
+		if(u.size() != 0)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(v.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                            { err("operator- test (r-value, l-value) [size]");         }
+		if(v[0] != 1 || v[1] != 3 || v[2] != 1 || v[3] != 4){ err("operator- test (l-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {3, 6, 5, 5};
+		Matrix<double> res = std::move(v) + std::move(u);
+		if(u.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(v.size() != 0)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                            { err("operator- test (r-value, l-value) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
 
+	
 	{
-		Matrix<double> res = u / 2.0;
-		if (u.size() != 9) { err("operator/ test (l-value, scalar) [src size]"); }
-		if (res.size() != 9) { err("operator/ test (l-value, scalar) [size]"); }
-		if (res[1] != 0) { err("operator/ test (l-value, scalar) [src elements]"); }
+    		Matrix<double> ref = {-1.0, 0.0, -3.0, 3.0};
+		Matrix<double> res = v - u;
+		if(u.size() != 4)                              { err("operator- test (l-value, l-value) [src size]");     }
+		if(u[0] != 2 || u[1] != 3 || u[2] != 4 || u[3] != 1)  { err("operator- test (l-value, l-value) [src elements]"); }
+		if(v.size() != 4)                              { err("operator- test (l-value, l-value) [src size]");     }
+		if(v[0] != 1 || v[1] != 3 || v[2] != 1 || v[3] != 4){ err("operator- test (l-value, l-value) [src elements]"); }
+		if(res.size() != 4)                            { err("operator- test (l-value, l-value) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	} 
+	
+	{
+    		Matrix<double> ref = {-1.0, 0.0, -3.0, 3.0};
+		Matrix<double> res = std::move(v) - u;
+		if(u.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(v.size() != 0)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                            { err("operator- test (r-value, l-value) [size]");         }
+		if(u[0] != 2 || u[1] !=  3 || u[2] !=  4 || u[3] != 1){ err("operator- test (r-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
-
+	
+	
 	{
-		Matrix<double> res = u / 2.0;
-		if (res.size() != 9) { err("operator/ test (l-value, scalar) [size]"); }
-		if (res[1] != 0) { err("operator/ test (l-value, scalar) [src elements]"); }
+    		Matrix<double> ref = {-1.0, 0.0, -3.0, 3.0};
+		Matrix<double> res = v - std::move(u);
+		if(u.size() != 0)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(v.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                            { err("operator- test (r-value, l-value) [size]");         }
+		if(v[0] != 1 || v[1] != 3 || v[2] != 1 || v[3] != 4){ err("operator- test (l-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
-
+	
 	{
+    		Matrix<double> ref = {-1.0, 0.0, -3.0, 3.0};
+		Matrix<double> res = std::move(v) - std::move(u);
+		if(u.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(v.size() != 0)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                            { err("operator- test (r-value, l-value) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {4, 6, 8, 1};
 		Matrix<double> res = u * 2.0;
-		if (u.size() != 9) { err("operator/ test (l-value, scalar) [src size]"); }
-		if (res.size() != 9) { err("operator/ test (l-value, scalar) [size]"); }
-		if (res[1] != 0) { err("operator/ test (l-value, scalar) [src elements]"); }
+		if(u.size()   != 4)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(u[0] != 2 || u[1] !=  3 || u[2] !=  4 || u[3] != 1){ err("operator- test (r-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
-
+	
 	{
+		Matrix<double> ref = {4, 6, 8, 1};
+		Matrix<double> res = std::move(u) * 2.0;
+		if(u.size()   != 0)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {4, 6, 8, 1};
 		Matrix<double> res = 2.0 * u;
-		if (u.size() != 9) { err("operator* test (scalar, l-value) [src size]"); }
-		if (res.size() != 9) { err("operator* test (scalar, l-value) [size]"); }
-		if (res[1] != 0) { err("operator* test (scalar, l-value) [src elements]"); }
-	}
-
-	
-	{
-		Matrix<double> res = u + v;
-		if (u.size() != 9) { err("operator+ test (l-value, l-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (l-value, l-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (l-value, l-value) [size]"); }
-	}
-
-	
-	{
-		Matrix<double> res = move(u) + v;
-		if (u.size() != 9) { err("operator+ test (r-value, l-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (r-value, l-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (r-value, l-value) [size]"); }
-	}
-
-	
-	{
-		Matrix<double> res = u + move(v);
-		if (u.size() != 9) { err("operator+ test (l-value, r-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (l-value, r-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (l-value, r-value) [size]"); }
+		if(u.size()   != 4)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(u[0] != 2 || u[1] !=  3 || u[2] !=  4 || u[3] != 1){ err("operator- test (r-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
 	
-
 	{
-		Matrix<double> res = move(u) + move(v);
-		if (u.size() != 9) { err("operator+ test (r-value, r-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (r-value, r-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (r-value, r-value) [size]"); }
-	}
-
-	
-	{
-		Matrix<double> res = u + v;
-		if (u.size() != 9) { err("operator+ test (l-value, l-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (l-value, l-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (l-value, l-value) [size]"); }
-	}
-
-
-	{
-		Matrix<double> res = move(u) + v;
-		if (u.size() != 9) { err("operator+ test (r-value, l-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (r-value, l-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (r-value, l-value) [size]"); }
-	}
-
-	
-	{
-		Matrix<double> res = u + move(v);
-		if (u.size() != 9) { err("operator+ test (l-value, r-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (l-value, r-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (l-value, r-value) [size]"); }
+		Matrix<double> ref = {4, 6, 8, 1};
+		Matrix<double> res = 2.0 * std::move(u);
+		if(u.size()   != 0)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
 	
-
 	{
-		Matrix<double> res = move(u) + move(v);
-		if (u.size() != 9) { err("operator+ test (r-value, r-value) [src size]"); }
-		if (v.size() != 9) { err("operator+ test (r-value, r-value) [src size]"); }
-		if (res.size() != 9) { err("operator+ test (r-value, r-value) [size]"); }
+		Matrix<double> ref = {1, 1.5, 2, 0.5};
+		Matrix<double> res = u * 2.0;
+		if(u.size()   != 4)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(u[0] != 2 || u[1] !=  3 || u[2] !=  4 || u[3] != 1){ err("operator- test (r-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {1, 1.5, 2, 0.5};
+		Matrix<double> res = std::move(u) * 2.0;
+		if(u.size()   != 0)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {2, 9, 4, 4};
+		Matrix<double> res = u * v;
+		if(u.size()   != 4)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(v.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(u[0] != 2 || u[1] !=  3 || u[2] !=  4 || u[3] != 1){ err("operator- test (r-value, l-value) [src elements]"); }
+		if(v[0] != 1 || v[1] != 3 || v[2] != 1 || v[3] != 4){ err("operator- test (l-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {2, 9, 4, 4};
+		Matrix<double> res = std::move(u) * v;
+		if(u.size()   != 0)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(v[0] != 1 || v[1] != 3 || v[2] != 1 || v[3] != 4){ err("operator- test (l-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {2, 9, 4, 4};
+		Matrix<double> res = u * std::move(v);
+		if(v.size()   != 0)                           { err("operator* test (l-value, scalar) [src size]");     }
+		if(res.size() != 4)                           { err("operator* test (l-value, scalar) [size]");         }
+		if(u[0] != 2 || u[1] !=  3 || u[2] !=  4 || u[3] != 1){ err("operator- test (r-value, l-value) [src elements]"); }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
+	}
+	
+	{
+		Matrix<double> ref = {2, 9, 4, 4};
+		Matrix<double> res = std::move(u) * std::move(v);
+		if(u.size() != 4)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(v.size() != 0)                              { err("operator- test (r-value, l-value) [src size]");     }
+		if(res.size() != 4)                            { err("operator- test (r-value, l-value) [size]");         }
+		if(std::abs(ref[0]-res[0]) > 1e-15 ||
+		   std::abs(ref[1]-res[1]) > 1e-15 || 
+		   std::abs(ref[2]-res[2]) > 1e-15 ||
+		   std::abs(ref[3]-res[3]) > 1e-15    ){ err("operator+ test (l-value, l-value) [elements]"); }
 	}
 	
 	std::mt19937 gen(42);
