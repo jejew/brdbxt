@@ -31,7 +31,7 @@ struct Idx2 {};
 template<typename T>
 struct Matrix
 {
-	int N = 3;
+	int N;
 	std::vector<T> data;
 
 	T& operator()(int i, int j) { return data[N * i + j]; }
@@ -50,22 +50,26 @@ struct Matrix
 	template<typename F>
 	Matrix(Idx1, F f, int n)
 	{
-		data.resize(n * N);
-		for (int i = 0; i < n * N; ++i) { data[i] = f(i); }
+	    N = n;
+		data.resize(N * N);
+		for (int i = 0; i < N * N; ++i) { data[i] = f(i); }
 	}
 
 	template<typename F>
 	Matrix(Idx2, F f, int n)
 	{
-		data.resize(n * N);
-		for (int i = 0; i < n; ++i)
+	    N = n;
+		data.resize(N * N);
+		for (int i = 0; i < N; ++i)
 		{
-			for (int j = 0; j < n; ++j)
+			for (int j = 0; j < N; ++j)
 			{
-				data[n * i + j] = f(i, j);
+				data[N * i + j] = f(i, j);
 			}
 		}
 	}
+	
+	Matrix( std::initializer_list<T> const& il ) : data{il}{}
 
 	Matrix<T>& operator+= (Matrix<T> const& cpy)
 	{
@@ -98,7 +102,7 @@ struct Matrix
 
 	int row_col() const
 	{
-		return static_cast<int>(N);
+		return N;
 	}
 
 	auto begin()
